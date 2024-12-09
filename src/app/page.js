@@ -1,66 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  motion,
-  AnimatePresence,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
-import {
-  AiFillWarning,
   AiOutlineReload,
   AiOutlineHome,
   AiOutlineSetting,
   AiOutlineUser,
   AiOutlineGithub,
 } from "react-icons/ai";
-import { MdDashboard, MdNotifications } from "react-icons/md";
 import { SunIcon, MoonIcon } from "lucide-react";
-
-// Animated Background Component
-const AnimatedBackground = () => {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const backgroundX = useTransform(x, [-100, 100], ["-10%", "10%"]);
-  const backgroundY = useTransform(y, [-100, 100], ["-10%", "10%"]);
-
-  const handleMouseMove = (event) => {
-    x.set(event.clientX - window.innerWidth / 2);
-    y.set(event.clientY - window.innerHeight / 2);
-  };
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-0 overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #1a1a2e, #16213e)",
-        backgroundSize: "400% 400%",
-        transform: "translate3d(0,0,0)",
-        perspective: "1000px",
-      }}
-      animate={{
-        backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-      }}
-      transition={{
-        duration: 15,
-        repeat: Infinity,
-        ease: "linear",
-      }}
-      onMouseMove={handleMouseMove}
-    >
-      <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-blue-900/20 mix-blend-overlay"
-        style={{
-          x: backgroundX,
-          y: backgroundY,
-        }}
-      />
-      <div className="absolute inset-0 bg-noise opacity-10" />
-    </motion.div>
-  );
-};
+import AnimatedBackground from "./components/AnimatedBackgroud";
 
 // Header Component
 const Header = ({ toggleTheme, isDarkMode }) => {
@@ -99,14 +49,8 @@ const Header = ({ toggleTheme, isDarkMode }) => {
             whileTap={{ scale: 0.95 }}
             className="text-purple-300 hover:bg-purple-800/30 p-2 rounded-full transition-colors"
           >
-            <MdNotifications className="text-2xl" />
+            <AiOutlineReload className="text-2xl" />
           </motion.button>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 300 }}
-            className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-lg"
-          />
         </div>
       </div>
     </motion.header>
@@ -209,19 +153,16 @@ export default function Dashboard() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Function to toggle between themes
   const toggleTheme = () => {
     const newTheme = isDarkMode ? "light" : "dark";
     setIsDarkMode(!isDarkMode);
 
-    // Cleanly toggle between themes
     document.documentElement.classList.remove("dark", "light");
     document.documentElement.classList.add(newTheme);
 
     localStorage.setItem("theme", newTheme);
   };
 
-  // Set the initial theme based on saved preference or system settings
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
 

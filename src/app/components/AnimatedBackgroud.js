@@ -72,7 +72,7 @@ const AnimatedBackground = () => {
     window.addEventListener("resize", resizeCanvas);
 
     // Create particles
-    const particleCount = 150;
+    const particleCount = 300;
     particlesRef.current = Array.from(
       { length: particleCount },
       () => new Particle(canvas)
