@@ -7,12 +7,21 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+      keyframes: {
+        spin: {
+          "0%": { transform: "rotate(0deg) scale(1)" },
+          "50%": { transform: "rotate(180deg) scale(1.2)" },
+          "100%": { transform: "rotate(360deg) scale(1)" },
+        },
+        spinReverse: {
+          "0%": { transform: "rotate(0deg) scale(1)" },
+          "50%": { transform: "rotate(-180deg) scale(1.2)" },
+          "100%": { transform: "rotate(-360deg) scale(1)" },
+        },
       },
       animation: {
-        pulse: "pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        spin: "spin 40s linear infinite",
+        spinReverse: "spinReverse 50s linear infinite",
       },
     },
   },
