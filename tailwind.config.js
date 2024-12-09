@@ -1,29 +1,56 @@
 /** @type {import('tailwindcss').Config} */
+const defaultTheme = require("tailwindcss/defaultTheme");
+
 module.exports = {
+  darkMode: "class",
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/styles/**/*.{css,scss}",
   ],
   theme: {
     extend: {
-      keyframes: {
-        spin: {
-          "0%": { transform: "rotate(0deg) scale(1)" },
-          "50%": { transform: "rotate(180deg) scale(1.2)" },
-          "100%": { transform: "rotate(360deg) scale(1)" },
-        },
-        spinReverse: {
-          "0%": { transform: "rotate(0deg) scale(1)" },
-          "50%": { transform: "rotate(-180deg) scale(1.2)" },
-          "100%": { transform: "rotate(-360deg) scale(1)" },
+      fontFamily: {
+        sans: ["var(--font-geist-sans)", ...defaultTheme.fontFamily.sans], // Use defaultTheme.fontFamily.sans
+        mono: ["var(--font-geist-mono)", ...defaultTheme.fontFamily.mono], // Use defaultTheme.fontFamily.mono
+      },
+      colors: {
+        "bg-gradient": {
+          start: "var(--bg-gradient-start)",
+          end: "var(--bg-gradient-end)",
         },
       },
+      backgroundImage: {
+        noise: 'url("/noise.svg")', // Optional noise background
+      },
       animation: {
-        spin: "spin 40s linear infinite",
-        spinReverse: "spinReverse 50s linear infinite",
+        float: "float 4s ease-in-out infinite",
+        spin: "spin 1s linear infinite",
+      },
+      keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" },
+        },
+      },
+      boxShadow: {
+        glass:
+          "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      },
+      backdropBlur: {
+        xs: "2px",
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            color: "var(--text-primary)",
+          },
+        },
       },
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [
+    require("@tailwindcss/typography"),
+    require("tailwind-scrollbar-hide"),
+  ],
 };

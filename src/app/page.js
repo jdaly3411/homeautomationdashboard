@@ -1,74 +1,132 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import SensorCard from "./components/SensorCard";
-import { motion, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+} from "framer-motion";
 import {
   AiFillWarning,
   AiOutlineReload,
-  AiFillPlusCircle,
   AiOutlineHome,
   AiOutlineSetting,
   AiOutlineUser,
   AiOutlineGithub,
 } from "react-icons/ai";
+import { MdDashboard, MdNotifications } from "react-icons/md";
+import { SunIcon, MoonIcon } from "lucide-react";
 
 // Animated Background Component
 const AnimatedBackground = () => {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const backgroundX = useTransform(x, [-100, 100], ["-10%", "10%"]);
+  const backgroundY = useTransform(y, [-100, 100], ["-10%", "10%"]);
+
+  const handleMouseMove = (event) => {
+    x.set(event.clientX - window.innerWidth / 2);
+    y.set(event.clientY - window.innerHeight / 2);
+  };
+
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-      <div
-        className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] 
-        bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 
-        animate-[spin_40s_linear_infinite]"
-      ></div>
-      <div
-        className="absolute -bottom-1/2 -right-1/2 w-[200%] h-[200%] 
-        bg-gradient-to-l from-green-400/20 via-teal-500/20 to-blue-600/20 
-        animate-[spinReverse_50s_linear_infinite]"
-      ></div>
-    </div>
+    <motion.div
+      className="fixed inset-0 z-0 overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #1a1a2e, #16213e)",
+        backgroundSize: "400% 400%",
+        transform: "translate3d(0,0,0)",
+        perspective: "1000px",
+      }}
+      animate={{
+        backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+      }}
+      transition={{
+        duration: 15,
+        repeat: Infinity,
+        ease: "linear",
+      }}
+      onMouseMove={handleMouseMove}
+    >
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-purple-900/20 to-blue-900/20 mix-blend-overlay"
+        style={{
+          x: backgroundX,
+          y: backgroundY,
+        }}
+      />
+      <div className="absolute inset-0 bg-noise opacity-10" />
+    </motion.div>
   );
 };
 
 // Header Component
-const Header = () => {
+const Header = ({ toggleTheme, isDarkMode }) => {
   return (
     <motion.header
       initial={{ opacity: 0, y: -50 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/70 backdrop-blur-md shadow-md fixed top-0 left-0 right-0 z-40"
+      className="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl bg-gray-900/50 shadow-2xl"
     >
       <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text font-bold text-2xl">
+          <div className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 font-bold text-2xl">
             HomeSync
           </div>
+          <nav className="flex items-center space-x-4 ml-6">
+            <NavItem icon={<AiOutlineHome />} label="Dashboard" active />
+            <NavItem icon={<AiOutlineSetting />} label="Settings" />
+            <NavItem icon={<AiOutlineUser />} label="Profile" />
+          </nav>
         </div>
-        <nav className="flex items-center space-x-6">
-          <a
-            href="#"
-            className="flex items-center text-gray-700 hover:text-blue-600 transition"
+        <div className="flex items-center space-x-4">
+          <motion.button
+            onClick={toggleTheme}
+            whileHover={{ scale: 1.1, rotate: 180 }}
+            whileTap={{ scale: 0.95 }}
+            className="text-purple-300 hover:bg-purple-800/30 p-2 rounded-full transition-colors"
           >
-            <AiOutlineHome className="mr-2" /> Dashboard
-          </a>
-          <a
-            href="#"
-            className="flex items-center text-gray-700 hover:text-blue-600 transition"
+            {isDarkMode ? (
+              <SunIcon className="text-2xl" />
+            ) : (
+              <MoonIcon className="text-2xl" />
+            )}
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="text-purple-300 hover:bg-purple-800/30 p-2 rounded-full transition-colors"
           >
-            <AiOutlineSetting className="mr-2" /> Settings
-          </a>
-          <a
-            href="#"
-            className="flex items-center text-gray-700 hover:text-blue-600 transition"
-          >
-            <AiOutlineUser className="mr-2" /> Profile
-          </a>
-        </nav>
+            <MdNotifications className="text-2xl" />
+          </motion.button>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-lg"
+          />
+        </div>
       </div>
     </motion.header>
   );
 };
+
+// Navigation Item Component
+const NavItem = ({ icon, label, active = false }) => (
+  <a
+    href="#"
+    className={`flex items-center space-x-2 px-3 py-1 rounded-full transition-all ${
+      active
+        ? "bg-gradient-to-r from-purple-700/30 to-pink-700/30 text-purple-200"
+        : "hover:bg-gray-800 text-gray-400"
+    }`}
+  >
+    {icon}
+    <span className="text-sm font-medium">{label}</span>
+  </a>
+);
 
 // Footer Component
 const Footer = () => {
@@ -76,33 +134,112 @@ const Footer = () => {
     <motion.footer
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/70 backdrop-blur-md shadow-md fixed bottom-0 left-0 right-0 z-40"
+      className="fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl bg-gray-900/50 shadow-2xl"
     >
       <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="text-gray-500 text-sm">
+        <div className="text-gray-400 text-sm">
           © 2024 HomeSync. All rights reserved.
         </div>
         <div className="flex items-center space-x-4">
-          <a
+          <motion.a
             href="https://github.com/jdaly3411/Home-Automation-Dashboard"
-            className="text-gray-700 hover:text-blue-600 transition"
-            title="GitHub Repository"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.95 }}
+            className="text-purple-300 hover:bg-purple-800/30 p-2 rounded-full transition-colors"
           >
             <AiOutlineGithub className="text-2xl" />
-          </a>
-          <div className="text-gray-400">|</div>
-          <div className="text-sm text-gray-500">Version 1.0.0</div>
+          </motion.a>
+          <div className="text-gray-600">|</div>
+          <div className="text-sm text-gray-400">Version 1.0.0</div>
         </div>
       </div>
     </motion.footer>
   );
 };
 
+// Sensor Card Component
+const SensorCard = ({ temperature, humidity, timestamp, index }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{
+        type: "spring",
+        stiffness: 300,
+        damping: 20,
+        delay: index * 0.1,
+      }}
+      whileHover={{
+        scale: 1.05,
+        transition: { duration: 0.2 },
+      }}
+      className="bg-gray-800/60 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-gray-700/50 hover:border-purple-500/50 transform transition-all duration-300"
+    >
+      <div className="flex justify-between items-center mb-4">
+        <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+          Sensor Data
+        </div>
+        <span className="text-xs text-gray-400">
+          {new Date(timestamp).toLocaleString()}
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-gray-900/50 rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold text-blue-400">
+            {temperature.toFixed(1)}°
+          </div>
+          <div className="text-xs text-gray-400 mt-1">Temperature</div>
+        </div>
+        <div className="bg-gray-900/50 rounded-xl p-4 text-center">
+          <div className="text-3xl font-bold text-green-400">
+            {humidity.toFixed(1)}%
+          </div>
+          <div className="text-xs text-gray-400 mt-1">Humidity</div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Main Dashboard Component
 export default function Dashboard() {
   const [sensorData, setSensorData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Function to toggle between themes
+  const toggleTheme = () => {
+    const newTheme = isDarkMode ? "light" : "dark";
+    setIsDarkMode(!isDarkMode);
+
+    // Cleanly toggle between themes
+    document.documentElement.classList.remove("dark", "light");
+    document.documentElement.classList.add(newTheme);
+
+    localStorage.setItem("theme", newTheme);
+  };
+
+  // Set the initial theme based on saved preference or system settings
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+
+    if (savedTheme) {
+      setIsDarkMode(savedTheme === "dark");
+      document.documentElement.classList.remove("dark", "light");
+      document.documentElement.classList.add(savedTheme);
+    } else {
+      const prefersDarkMode = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      setIsDarkMode(prefersDarkMode);
+      document.documentElement.classList.remove("dark", "light");
+      document.documentElement.classList.add(
+        prefersDarkMode ? "dark" : "light"
+      );
+    }
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -122,136 +259,57 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData();
     const intervalId = setInterval(fetchData, 60000); // Refresh every minute
-
     return () => clearInterval(intervalId);
   }, []);
 
-  if (error) {
-    return (
-      <>
-        <AnimatedBackground />
-        <Header />
-        <div className="min-h-screen flex items-center justify-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center bg-white/80 backdrop-blur-md shadow-2xl rounded-xl p-8 max-w-md w-full"
-          >
-            <AiFillWarning className="mx-auto mb-4 text-red-500 text-5xl" />
-            <h1 className="text-2xl text-red-600 font-bold mb-2">{error}</h1>
-            <p className="text-gray-600">
-              Please check your backend connection
-            </p>
-            <button
-              onClick={fetchData}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center justify-center mx-auto"
-            >
-              <AiOutlineReload className="mr-2" /> Retry Connection
-            </button>
-          </motion.div>
-        </div>
-        <Footer />
-      </>
-    );
-  }
-
   return (
-    <>
+    <div className={`min-h-screen`}>
       <AnimatedBackground />
-      <Header />
+      <Header toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
       <div className="min-h-screen pt-20 pb-20 relative z-10 bg-transparent">
         <div className="max-w-6xl mx-auto px-4">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl font-extrabold text-center mb-10 text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600"
+            className="text-4xl font-extrabold text-center mb-10 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600"
           >
             Home Automation Dashboard
           </motion.h1>
 
-          {/* Last Updated Indicator */}
           {lastUpdated && (
-            <div className="text-center text-gray-500 mb-4 flex justify-center items-center">
-              <AiOutlineReload className="mr-2 text-blue-500" />
-              <span>Last updated: {lastUpdated.toLocaleString()}</span>
-            </div>
-          )}
-
-          {isLoading ? (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center"
+              className="text-center text-gray-400 mb-4 flex justify-center items-center"
             >
-              <div className="animate-pulse text-gray-600">
-                Loading sensor data...
-              </div>
+              <AiOutlineReload className="mr-2 text-blue-500 animate-spin" />
+              <span>Last updated: {lastUpdated.toLocaleString()}</span>
             </motion.div>
-          ) : (
-            <>
-              {sensorData.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center bg-white/80 backdrop-blur-md shadow-md rounded-xl p-8"
-                >
-                  <AiFillPlusCircle className="mx-auto mb-4 text-blue-500 text-5xl" />
-                  <p className="text-gray-500">No sensor data available</p>
-                  <p className="text-sm text-gray-400 mt-2">
-                    Connect your sensors or check your backend configuration
-                  </p>
-                </motion.div>
-              ) : (
-                <AnimatePresence>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {sensorData.map((data, index) => (
-                      <motion.div
-                        key={data.id || index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <SensorCard
-                          temperature={data.temperature}
-                          humidity={data.humidity}
-                          timestamp={data.timestamp}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                </AnimatePresence>
-              )}
-            </>
           )}
 
-          {/* Future Expansion Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-10 text-center"
-          >
-            <div className="bg-white/80 backdrop-blur-md shadow-lg rounded-xl p-6 max-w-xl mx-auto">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                Coming Soon: Advanced Controls
-              </h2>
-              <p className="text-gray-600 mb-4">
-                Get ready for new features including servo motor controls,
-                advanced sensor management, and real-time device interactions.
-              </p>
-              <div className="flex justify-center space-x-4">
-                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                  Explore Roadmap
-                </button>
-                <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition">
-                  Contact Support
-                </button>
-              </div>
+          {isLoading ? (
+            <div className="text-center text-gray-400 animate-pulse">
+              Loading sensor data...
             </div>
-          </motion.div>
+          ) : error ? (
+            <div className="text-center text-red-500">{error}</div>
+          ) : (
+            <AnimatePresence>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {sensorData.map((data, index) => (
+                  <SensorCard
+                    key={index}
+                    temperature={data.temperature}
+                    humidity={data.humidity}
+                    timestamp={data.timestamp}
+                    index={index}
+                  />
+                ))}
+              </div>
+            </AnimatePresence>
+          )}
         </div>
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }
