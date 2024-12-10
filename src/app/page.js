@@ -7,143 +7,15 @@ import {
   AiOutlineHome,
   AiOutlineSetting,
   AiOutlineUser,
-  AiOutlineGithub,
+  AiOutlineFilter,
 } from "react-icons/ai";
 import { SunIcon, MoonIcon } from "lucide-react";
 import AnimatedBackground from "./components/AnimatedBackgroud";
-
-// Header Component
-const Header = ({ toggleTheme, isDarkMode }) => {
-  return (
-    <motion.header
-      initial={{ opacity: 0, y: -50 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="fixed top-0 left-0 right-0 z-40 backdrop-blur-xl bg-gray-900/50 shadow-2xl"
-    >
-      <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <div className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 font-bold text-2xl">
-            HomeSync
-          </div>
-          <nav className="flex items-center space-x-4 ml-6">
-            <NavItem icon={<AiOutlineHome />} label="Dashboard" active />
-            <NavItem icon={<AiOutlineSetting />} label="Settings" />
-            <NavItem icon={<AiOutlineUser />} label="Profile" />
-          </nav>
-        </div>
-        <div className="flex items-center space-x-4">
-          <motion.button
-            onClick={toggleTheme}
-            whileHover={{ scale: 1.1, rotate: 180 }}
-            whileTap={{ scale: 0.95 }}
-            className="text-purple-300 hover:bg-purple-800/30 p-2 rounded-full transition-colors"
-          >
-            {isDarkMode ? (
-              <SunIcon className="text-2xl" />
-            ) : (
-              <MoonIcon className="text-2xl" />
-            )}
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="text-purple-300 hover:bg-purple-800/30 p-2 rounded-full transition-colors"
-          >
-            <AiOutlineReload className="text-2xl" />
-          </motion.button>
-        </div>
-      </div>
-    </motion.header>
-  );
-};
-
-// Navigation Item Component
-const NavItem = ({ icon, label, active = false }) => (
-  <a
-    href="#"
-    className={`flex items-center space-x-2 px-3 py-1 rounded-full transition-all ${
-      active
-        ? "bg-gradient-to-r from-purple-700/30 to-pink-700/30 text-purple-200"
-        : "hover:bg-gray-800 text-gray-400"
-    }`}
-  >
-    {icon}
-    <span className="text-sm font-medium">{label}</span>
-  </a>
-);
-
-// Footer Component
-const Footer = () => {
-  return (
-    <motion.footer
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="fixed bottom-0 left-0 right-0 z-40 backdrop-blur-xl bg-gray-900/50 shadow-2xl"
-    >
-      <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="text-gray-400 text-sm">
-          © 2024 HomeSync. All rights reserved.
-        </div>
-        <div className="flex items-center space-x-4">
-          <motion.a
-            href="https://github.com/jdaly3411/Home-Automation-Dashboard"
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            whileTap={{ scale: 0.95 }}
-            className="text-purple-300 hover:bg-purple-800/30 p-2 rounded-full transition-colors"
-          >
-            <AiOutlineGithub className="text-2xl" />
-          </motion.a>
-          <div className="text-gray-600">|</div>
-          <div className="text-sm text-gray-400">Version 1.0.0</div>
-        </div>
-      </div>
-    </motion.footer>
-  );
-};
-
-// Sensor Card Component
-const SensorCard = ({ temperature, humidity, timestamp, index }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{
-        type: "spring",
-        stiffness: 300,
-        damping: 20,
-        delay: index * 0.1,
-      }}
-      whileHover={{
-        scale: 1.05,
-        transition: { duration: 0.2 },
-      }}
-      className="bg-gray-800/60 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-gray-700/50 hover:border-purple-500/50 transform transition-all duration-300"
-    >
-      <div className="flex justify-between items-center mb-4">
-        <div className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
-          Sensor Data
-        </div>
-        <span className="text-xs text-gray-400">
-          {new Date(timestamp).toLocaleString()}
-        </span>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-900/50 rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold text-blue-400">
-            {temperature.toFixed(1)}°
-          </div>
-          <div className="text-xs text-gray-400 mt-1">Temperature</div>
-        </div>
-        <div className="bg-gray-900/50 rounded-xl p-4 text-center">
-          <div className="text-3xl font-bold text-green-400">
-            {humidity.toFixed(1)}%
-          </div>
-          <div className="text-xs text-gray-400 mt-1">Humidity</div>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+import FilterModal from "./components/FilterModal";
+import NavItem from "./components/NavItem";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
+import SensorCard from "./components/SensorCard";
 
 // Main Dashboard Component
 export default function Dashboard() {
@@ -152,62 +24,138 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+
+  // Filter state
+  const [filterParams, setFilterParams] = useState({
+    startDate: "",
+    endDate: "",
+    startTime: "",
+    endTime: "",
+  });
 
   const toggleTheme = () => {
     const newTheme = isDarkMode ? "light" : "dark";
     setIsDarkMode(!isDarkMode);
-
-    document.documentElement.classList.remove("dark", "light");
     document.documentElement.classList.add(newTheme);
-
     localStorage.setItem("theme", newTheme);
   };
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
-
-    if (savedTheme) {
-      setIsDarkMode(savedTheme === "dark");
-      document.documentElement.classList.remove("dark", "light");
-      document.documentElement.classList.add(savedTheme);
-    } else {
-      const prefersDarkMode = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      setIsDarkMode(prefersDarkMode);
-      document.documentElement.classList.remove("dark", "light");
-      document.documentElement.classList.add(
-        prefersDarkMode ? "dark" : "light"
-      );
-    }
+    const prefersDarkMode = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    const theme = savedTheme || (prefersDarkMode ? "dark" : "light");
+    setIsDarkMode(theme === "dark");
+    document.documentElement.classList.add(theme);
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (filters = {}) => {
     try {
       setIsLoading(true);
-      const res = await axios.get("http://127.0.0.1:8000/api/sensor-data/");
-      setSensorData(res.data);
+
+      // Construct query parameters
+      const queryParams = new URLSearchParams();
+
+      if (filters.startDate) {
+        queryParams.append("start_date", filters.startDate);
+      }
+      if (filters.endDate) {
+        queryParams.append("end_date", filters.endDate);
+      }
+      if (filters.startTime) {
+        queryParams.append("start_time", filters.startTime);
+      }
+      if (filters.endTime) {
+        queryParams.append("end_time", filters.endTime);
+      }
+
+      // Construct the full URL with query parameters
+      const url = `http://127.0.0.1:8000/api/sensor-data/?${queryParams.toString()}`;
+
+      const res = await axios.get(url);
+      setSensorData(res.data.slice(0, 9)); // Limit to 9 sensor cards
       setLastUpdated(new Date());
-      setError(null);
     } catch (err) {
       setError("Failed to fetch sensor data");
-      console.error("Fetch error:", err);
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-    const intervalId = setInterval(fetchData, 60000); // Refresh every minute
+    fetchData(filterParams);
+    const intervalId = setInterval(() => fetchData(filterParams), 60000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, [filterParams]);
+
+  const handleApplyFilter = (newFilterParams) => {
+    setFilterParams(newFilterParams);
+  };
+
+  const clearFilter = () => {
+    setFilterParams({
+      startDate: "",
+      endDate: "",
+      startTime: "",
+      endTime: "",
+    });
+  };
 
   return (
-    <div className={`min-h-screen`}>
+    <div className="min-h-screen">
       <AnimatedBackground />
-      <Header toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
-      <div className="min-h-screen pt-20 pb-20 relative z-10 bg-transparent">
+
+      {/* Filter Modal */}
+      <FilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        onApplyFilter={handleApplyFilter}
+        initialStartDate={filterParams.startDate}
+        initialEndDate={filterParams.endDate}
+        initialStartTime={filterParams.startTime}
+        initialEndTime={filterParams.endTime}
+      />
+
+      <Header
+        toggleTheme={toggleTheme}
+        isDarkMode={isDarkMode}
+        extraButtons={
+          <>
+            <motion.button
+              onClick={() => setIsFilterModalOpen(true)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="text-purple-300 hover:bg-purple-800/30 p-2 rounded-full transition-colors relative"
+            >
+              <AiOutlineFilter className="text-2xl" />
+              {(filterParams.startDate ||
+                filterParams.endDate ||
+                filterParams.startTime ||
+                filterParams.endTime) && (
+                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+              )}
+            </motion.button>
+            {(filterParams.startDate ||
+              filterParams.endDate ||
+              filterParams.startTime ||
+              filterParams.endTime) && (
+              <motion.button
+                onClick={clearFilter}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="text-red-300 hover:bg-red-800/30 p-2 rounded-full transition-colors"
+              >
+                Clear Filter
+              </motion.button>
+            )}
+          </>
+        }
+      />
+
+      <div className="min-h-screen pt-20 pb-20 relative z-10">
         <div className="max-w-6xl mx-auto px-4">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
@@ -218,14 +166,9 @@ export default function Dashboard() {
           </motion.h1>
 
           {lastUpdated && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center text-gray-400 mb-4 flex justify-center items-center"
-            >
-              <AiOutlineReload className="mr-2 text-blue-500 animate-spin" />
-              <span>Last updated: {lastUpdated.toLocaleString()}</span>
-            </motion.div>
+            <div className="text-center text-gray-400 mb-4">
+              Last updated: {lastUpdated.toLocaleString()}
+            </div>
           )}
 
           {isLoading ? (
@@ -251,6 +194,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
